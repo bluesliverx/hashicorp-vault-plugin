@@ -4,14 +4,13 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSSessionCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
-import com.bettercloud.vault.VaultException;
-import com.bettercloud.vault.api.Auth;
-import com.bettercloud.vault.json.Json;
-import com.bettercloud.vault.json.JsonArray;
-import com.bettercloud.vault.json.JsonObject;
-import com.bettercloud.vault.response.AuthResponse;
-import com.datapipe.jenkins.vault.AwsHelper;
 import hudson.Util;
+import io.github.jopenlibs.vault.VaultException;
+import io.github.jopenlibs.vault.api.Auth;
+import io.github.jopenlibs.vault.json.Json;
+import io.github.jopenlibs.vault.json.JsonArray;
+import io.github.jopenlibs.vault.json.JsonObject;
+import io.github.jopenlibs.vault.response.AuthResponse;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -99,7 +98,7 @@ public class AwsHelperTest {
         final String decodedHeaders = new String(decoder.decode(headersArg.getValue()), charset);
         final JsonObject headersObject = Json.parse(decodedHeaders).asObject();
 
-        final List<String> expectedHeaderNames = new ArrayList<String>();
+        final List<String> expectedHeaderNames = new ArrayList<>();
         expectedHeaderNames.add("Host");
         expectedHeaderNames.add("Content-Type");
         expectedHeaderNames.add("Authorization");
@@ -120,8 +119,7 @@ public class AwsHelperTest {
         }
         assertThat(headersMap.get("Host"), is("sts.amazonaws.com"));
         assertThat(headersMap.get("Content-Type"), is("application/x-www-form-urlencoded; charset=utf-8"));
-        if (credentials instanceof AWSSessionCredentials) {
-            final AWSSessionCredentials sessionCreds = (AWSSessionCredentials) credentials;
+        if (credentials instanceof AWSSessionCredentials sessionCreds) {
             assertThat(headersMap.get("X-Amz-Security-Token"), is(sessionCreds.getSessionToken()));
         }
         if (StringUtils.isNotEmpty(serverId)) {

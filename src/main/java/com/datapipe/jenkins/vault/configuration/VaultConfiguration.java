@@ -1,8 +1,5 @@
 package com.datapipe.jenkins.vault.configuration;
 
-import com.bettercloud.vault.SslConfig;
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
@@ -16,9 +13,12 @@ import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
+import io.github.jopenlibs.vault.SslConfig;
+import io.github.jopenlibs.vault.VaultConfig;
+import io.github.jopenlibs.vault.VaultException;
 import java.io.Serializable;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
@@ -260,7 +260,7 @@ public class VaultConfiguration extends AbstractDescribableImpl<VaultConfigurati
             // This is needed for folders: credentials bound to a folder are
             // realized through domain requirements
             List<DomainRequirement> domainRequirements = URIRequirementBuilder.fromUri(uri).build();
-            return new StandardListBoxModel().includeEmptyValue().includeAs(ACL.SYSTEM, item,
+            return new StandardListBoxModel().includeEmptyValue().includeAs(ACL.SYSTEM2, item,
                 VaultCredential.class, domainRequirements);
         }
 

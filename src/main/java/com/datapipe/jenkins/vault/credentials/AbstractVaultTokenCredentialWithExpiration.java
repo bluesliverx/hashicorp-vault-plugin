@@ -1,14 +1,14 @@
 package com.datapipe.jenkins.vault.credentials;
 
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
-import com.bettercloud.vault.api.Auth;
-import com.bettercloud.vault.api.Auth.TokenRequest;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.datapipe.jenkins.vault.exception.VaultPluginException;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import io.github.jopenlibs.vault.Vault;
+import io.github.jopenlibs.vault.VaultConfig;
+import io.github.jopenlibs.vault.VaultException;
+import io.github.jopenlibs.vault.api.Auth;
+import io.github.jopenlibs.vault.api.Auth.TokenRequest;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +107,7 @@ public abstract class AbstractVaultTokenCredentialWithExpiration
     @Override
     public VaultAuthorizationResult authorizeWithVault(VaultConfig config, List<String> policies) {
         // Upgraded instances can have these not initialized in the constructor (serialized jobs possibly)
-        if (tokenCache == null) {
+        if (tokenCache == null || tokenExpiryCache == null) {
             tokenCache = new HashMap<>();
             tokenExpiryCache = new HashMap<>();
         }
@@ -129,11 +129,11 @@ public abstract class AbstractVaultTokenCredentialWithExpiration
         } else {
             config.token(tokenCache.get(cacheKey));
         }
-        return new VaultAuthorizationResult(vault, config.getToken());
+        return new VaultAuthorizationResult(vault, tokenCache.get(cacheKey));
     }
 
     protected Vault getVault(VaultConfig config) {
-        return new Vault(config);
+        return Vault.create(config);
     }
 
     private long getTokenTTL(Vault vault) throws VaultException {

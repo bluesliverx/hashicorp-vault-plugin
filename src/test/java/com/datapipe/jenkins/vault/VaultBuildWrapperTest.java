@@ -1,7 +1,5 @@
 package com.datapipe.jenkins.vault;
 
-import com.bettercloud.vault.response.LogicalResponse;
-import com.bettercloud.vault.rest.RestResponse;
 import com.datapipe.jenkins.vault.configuration.VaultConfiguration;
 import com.datapipe.jenkins.vault.exception.VaultPluginException;
 import com.datapipe.jenkins.vault.model.VaultSecret;
@@ -9,6 +7,8 @@ import com.datapipe.jenkins.vault.model.VaultSecretValue;
 import hudson.EnvVars;
 import hudson.model.Build;
 import hudson.model.Run;
+import io.github.jopenlibs.vault.response.LogicalResponse;
+import io.github.jopenlibs.vault.rest.RestResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -23,7 +23,7 @@ import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -62,7 +62,7 @@ public class VaultBuildWrapperTest {
 
         verify(mockAccessor, times(2)).init();
         verify(mockAccessor, times(2)).read(path, 2);
-        assertThat(new String(baos.toByteArray(), StandardCharsets.UTF_8),
+        assertThat(baos.toString(StandardCharsets.UTF_8),
             containsString("Vault credentials not found for 'not/existing'"));
     }
 

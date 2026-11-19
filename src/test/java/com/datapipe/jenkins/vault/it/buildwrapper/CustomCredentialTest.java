@@ -5,7 +5,7 @@ import com.datapipe.jenkins.vault.configuration.VaultConfiguration;
 import com.datapipe.jenkins.vault.util.TestConstants;
 import com.datapipe.jenkins.vault.util.VaultContainer;
 import hudson.model.Result;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -37,13 +37,13 @@ public class CustomCredentialTest implements TestConstants {
     private static WorkflowJob pipeline;
 
     @BeforeClass
-    public static void setupClass() throws IOException, InterruptedException {
+    public static void setupClass() throws Exception {
         assumeTrue(hasDockerDaemon());
         container.initAndUnsealVault();
         container.setBasicSecrets();
 
         pipeline = j.createProject(WorkflowJob.class, "Pipeline");
-        String pipelineText = IOUtils.toString(TestConstants.class.getResourceAsStream("custom_credential.groovy"));
+        String pipelineText = IOUtils.toString(TestConstants.class.getResourceAsStream("custom_credential.groovy"), StandardCharsets.UTF_8);
         pipelineText = pipelineText.replaceAll("#VAULT_TOKEN#", container.getRootToken());
         pipeline.setDefinition(new CpsFlowDefinition(pipelineText, false));
     }

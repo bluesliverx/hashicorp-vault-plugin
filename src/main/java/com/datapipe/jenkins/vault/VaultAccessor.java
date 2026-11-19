@@ -1,14 +1,5 @@
 package com.datapipe.jenkins.vault;
 
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
-import com.bettercloud.vault.json.Json;
-import com.bettercloud.vault.json.JsonArray;
-import com.bettercloud.vault.json.JsonValue;
-import com.bettercloud.vault.response.LogicalResponse;
-import com.bettercloud.vault.response.VaultResponse;
-import com.bettercloud.vault.rest.RestResponse;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsUnavailableException;
@@ -24,7 +15,17 @@ import hudson.ExtensionList;
 import hudson.Util;
 import hudson.model.Run;
 import hudson.security.ACL;
+import io.github.jopenlibs.vault.Vault;
+import io.github.jopenlibs.vault.VaultConfig;
+import io.github.jopenlibs.vault.VaultException;
+import io.github.jopenlibs.vault.json.Json;
+import io.github.jopenlibs.vault.json.JsonArray;
+import io.github.jopenlibs.vault.json.JsonValue;
+import io.github.jopenlibs.vault.response.LogicalResponse;
+import io.github.jopenlibs.vault.response.VaultResponse;
+import io.github.jopenlibs.vault.rest.RestResponse;
 import java.io.PrintStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -35,11 +36,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 public class VaultAccessor implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private VaultConfig config;
@@ -64,7 +66,7 @@ public class VaultAccessor implements Serializable {
             config.build();
 
             if (credential == null) {
-                vault = new Vault(config);
+                vault = Vault.create(config);
             } else {
                 vault = credential.authorizeWithVault(config, policies).getVault();
             }
@@ -123,12 +125,14 @@ public class VaultAccessor implements Serializable {
     }
 
     public LogicalResponse read(String path, Integer engineVersion) {
+        String normalizedPath = normalizePath(path);
         try {
             this.config.engineVersion(engineVersion);
-            return vault.logical().read(path);
+            return vault.logical().read(normalizedPath);
         } catch (VaultException e) {
             throw new VaultPluginException(
-                "could not read from vault: " + e.getMessage() + " at path: " + path, e);
+                "could not read from vault: " + e.getMessage() + " at path: "
+                    + normalizedPath, e);
         }
     }
 
@@ -246,7 +250,7 @@ public class VaultAccessor implements Serializable {
                     "The credential id was not configured - please specify the credentials to use.");
             }
             List<VaultCredential> credentials = CredentialsProvider
-                .lookupCredentials(VaultCredential.class, build.getParent(), ACL.SYSTEM,
+                .lookupCredentialsInItem(VaultCredential.class, build.getParent(), ACL.SYSTEM2,
                     Collections.emptyList());
             VaultCredential credential = CredentialsMatchers
                 .firstOrNull(credentials, new IdMatcher(id));
@@ -313,5 +317,26 @@ public class VaultAccessor implements Serializable {
         configuration.fixDefaults();
 
         return configuration;
+    }
+
+    /**
+     * Normalize user-supplied Vault paths so we don't send leading or duplicate slashes to Vault.
+     * Leading slashes cause requests like "/v1//path" which Vault replies to with HTTP 301 for KV v1.
+     */
+    static String normalizePath(String path) {
+        if (StringUtils.isBlank(path)) {
+            return path;
+        }
+
+        // remove any leading slashes
+        String cleaned = StringUtils.stripStart(path, "/");
+
+        // fast-path: nothing to do in the common case
+        if (!cleaned.contains("//")) {
+            return cleaned;
+        }
+
+        // collapse duplicate separators
+        return cleaned.replaceAll("/{2,}", "/");
     }
 }

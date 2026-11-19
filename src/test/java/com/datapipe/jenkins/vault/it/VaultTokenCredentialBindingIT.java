@@ -1,7 +1,5 @@
 package com.datapipe.jenkins.vault.it;
 
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.api.Auth;
 import com.cloudbees.hudson.plugins.folder.Folder;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -16,6 +14,8 @@ import com.datapipe.jenkins.vault.credentials.common.VaultGCRLoginImpl;
 import hudson.FilePath;
 import hudson.model.Result;
 import hudson.util.Secret;
+import io.github.jopenlibs.vault.VaultConfig;
+import io.github.jopenlibs.vault.api.Auth;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

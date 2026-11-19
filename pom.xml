@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.46</version>
+    <version>6.2211.v27f680c93c53</version>
     <relativePath />
   </parent>
   <groupId>com.datapipe.jenkins.plugins</groupId>
@@ -13,9 +13,12 @@
   <packaging>hpi</packaging>
   <properties>
     <changelist>9999-SNAPSHOT</changelist>
-    <jenkins.version>2.303.3</jenkins.version>
+    <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <hpi.compatibleSinceVersion>2.0.0</hpi.compatibleSinceVersion>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
+    <ban-commons-lang-2.skip>false</ban-commons-lang-2.skip>
   </properties>
   <name>HashiCorp Vault Plugin</name>
   <description>Reading secrets from HashiCorp Vault for a Pipeline or as a Secret Source for JCasC</description>
@@ -27,7 +30,7 @@
   <licenses>
     <license>
       <name>MIT License</name>
-      <url>http://opensource.org/licenses/MIT</url>
+      <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
   <developers>
@@ -76,12 +79,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>3.1.2</version>
+          <version>3.6.0</version>
           <dependencies>
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>8.31</version>
+              <version>10.23.0</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -111,15 +114,19 @@
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>commons-lang3-api</artifactId>
+    </dependency>
     <!-- Plugin Dependencies -->
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>structs</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.bettercloud</groupId>
+      <groupId>io.github.jopenlibs</groupId>
       <artifactId>vault-java-driver</artifactId>
-      <version>5.1.0</version>
+      <version>6.2.2</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -138,6 +145,10 @@
       <artifactId>credentials-binding</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>commons-text-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.jenkins</groupId>
       <artifactId>configuration-as-code</artifactId>
       <optional>true</optional>
@@ -145,7 +156,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.aws-java-sdk</groupId>
       <artifactId>aws-java-sdk-minimal</artifactId>
-      <version>1.12.246-349.v96b_b_f7eb_a_c3c</version>
       <optional>true</optional>
     </dependency>
     <!-- Test Dependencies -->
@@ -157,7 +167,7 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>vault</artifactId>
-      <version>1.15.2</version>
+      <version>1.20.1</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -176,11 +186,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-job</artifactId>
       <scope>test</scope>
@@ -188,7 +193,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-api</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -220,11 +224,35 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.303.x</artifactId>
-        <version>1500.ve4d05cd32975</version>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
+        <version>4545.v56392b_7ca_7b_a_</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <profiles>
+    <profile>
+      <id>jdk17</id>
+      <activation>
+        <jdk>[17,)</jdk>
+      </activation>
+      <properties />
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <configuration>
+                <argLine>-Xms768M -Xmx768M -XX:+HeapDumpOnOutOfMemoryError -XX:+TieredCompilation -XX:TieredStopAtLevel=1 @{jenkins.addOpens} @{jenkins.insaneHook}
+                  --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+                  --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED</argLine>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+  </profiles>
 </project>

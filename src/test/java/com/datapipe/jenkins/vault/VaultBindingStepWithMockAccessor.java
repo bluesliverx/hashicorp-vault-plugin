@@ -1,8 +1,5 @@
 package com.datapipe.jenkins.vault;
 
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.response.LogicalResponse;
-import com.bettercloud.vault.rest.RestResponse;
 import com.datapipe.jenkins.vault.credentials.VaultAppRoleCredential;
 import com.datapipe.jenkins.vault.credentials.VaultCredential;
 import com.datapipe.jenkins.vault.model.VaultSecret;
@@ -11,10 +8,10 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import java.util.Arrays;
-import java.util.Collections;
+import io.github.jopenlibs.vault.VaultConfig;
+import io.github.jopenlibs.vault.response.LogicalResponse;
+import io.github.jopenlibs.vault.rest.RestResponse;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,9 +85,7 @@ public class VaultBindingStepWithMockAccessor extends VaultBindingStep {
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return Collections
-                .unmodifiableSet(
-                    new HashSet<>(Arrays.asList(TaskListener.class, Run.class, EnvVars.class)));
+            return Set.of(TaskListener.class, Run.class, EnvVars.class);
         }
 
         @Override

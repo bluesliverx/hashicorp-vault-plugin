@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
+import jenkins.util.JenkinsJVM;
 import org.jenkinsci.plugins.credentialsbinding.masking.LiteralSecretPatternFactory;
 import org.jenkinsci.plugins.credentialsbinding.masking.SecretPatternFactory;
 import org.junit.Before;
@@ -29,10 +30,12 @@ public class MaskingConsoleLogFilterSpec {
 
     private @Mock(answer = Answers.CALLS_REAL_METHODS) MockedStatic<SecretPatternFactory> secretPatternFactoryMockedStatic;
 
+    private @Mock MockedStatic<JenkinsJVM> jenkinsJvmMockedStatic;
+
     @Before
     public void setup() {
         ExtensionList<SecretPatternFactory> factories = ExtensionList.create((Jenkins) null, SecretPatternFactory.class);
-        factories.addAll(Collections.singletonList(new LiteralSecretPatternFactory()));
+        factories.add(new LiteralSecretPatternFactory());
         secretPatternFactoryMockedStatic.when(SecretPatternFactory::all).thenReturn(factories);
     }
 
@@ -47,7 +50,7 @@ public class MaskingConsoleLogFilterSpec {
         maskingLogger.write("This is a test.\n".getBytes(StandardCharsets.UTF_8));
         maskingLogger.write("This is secret test.\n".getBytes(StandardCharsets.UTF_8));
 
-        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8.name()).split("\\n");
+        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8).split("\\n");
 
         assertThat(resultingLines[0], is("This is a test."));
         assertThat(resultingLines[1], is("This is **** test."));
@@ -65,7 +68,7 @@ public class MaskingConsoleLogFilterSpec {
         maskingLogger.write("This is veryverysecret test.\n".getBytes(StandardCharsets.UTF_8));
         maskingLogger.write("This is secret test.\n".getBytes(StandardCharsets.UTF_8));
 
-        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8.name()).split("\\n");
+        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8).split("\\n");
 
         assertThat(resultingLines[0], is("This is a test."));
         assertThat(resultingLines[1], is("This is **** test."));
@@ -83,7 +86,7 @@ public class MaskingConsoleLogFilterSpec {
         maskingLogger.write("This is a test.\n".getBytes(StandardCharsets.UTF_8));
         maskingLogger.write("This is veryverysecret test.\n".getBytes(StandardCharsets.UTF_8));
 
-        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8.name()).split("\\n");
+        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8).split("\\n");
 
         assertThat(resultingLines[0], is("This is a test."));
         assertThat(resultingLines[1], is("This is veryverysecret test."));
@@ -99,7 +102,7 @@ public class MaskingConsoleLogFilterSpec {
 
         OutputStream maskingLogger = filter.decorateLogger(mock(Run.class), resultingLog);
         maskingLogger.write("This is a test.\n".getBytes(StandardCharsets.UTF_8));
-        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8.name()).split("\\n");
+        String[] resultingLines = resultingLog.toString(StandardCharsets.UTF_8).split("\\n");
 
         assertThat(resultingLines[0], is("This is a ****."));
     }

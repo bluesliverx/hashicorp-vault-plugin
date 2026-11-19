@@ -20,7 +20,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import static com.datapipe.jenkins.vault.configuration.VaultConfiguration.engineVersions;
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class VaultUsernamePasswordCredentialBinding extends
     MultiBinding<VaultUsernamePasswordCredential> {
@@ -49,7 +49,7 @@ public class VaultUsernamePasswordCredentialBinding extends
         TaskListener listener)
         throws IOException, InterruptedException {
         VaultUsernamePasswordCredential credentials = this.getCredentials(build);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put(this.usernameVariable, credentials.getUsername());
         map.put(this.passwordVariable, credentials.getPassword().getPlainText());
         return new MultiEnvironment(map);
@@ -65,7 +65,7 @@ public class VaultUsernamePasswordCredentialBinding extends
 
     @Override
     public Set<String> variables() {
-        Set<String> variables = new HashSet<String>();
+        Set<String> variables = new HashSet<>();
         variables.add(this.usernameVariable);
         variables.add(this.passwordVariable);
         return variables;

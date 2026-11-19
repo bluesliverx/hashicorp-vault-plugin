@@ -1,9 +1,9 @@
 package com.datapipe.jenkins.vault.jcasc.secrets;
 
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
 import hudson.Extension;
+import io.github.jopenlibs.vault.Vault;
+import io.github.jopenlibs.vault.VaultConfig;
+import io.github.jopenlibs.vault.VaultException;
 import io.jenkins.plugins.casc.SecretSource;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.Properties;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Requires either CASC_VAULT_USER and CASC_VAULT_PW, or CASC_VAULT_TOKEN, or CASC_VAULT_APPROLE and
@@ -65,9 +65,8 @@ public class VaultSecretSource extends SecretSource {
 
         // Parse variables
         Optional<String> vaultEngineVersionOpt = getVariable(CASC_VAULT_ENGINE_VERSION);
-        Optional<String> vaultUrl = getVariable(CASC_VAULT_AGENT_ADDR)
-            .map(Optional::of)
-            .orElseGet(() -> getVariable(CASC_VAULT_URL));
+        Optional<String> vaultUrl = getVariable(CASC_VAULT_AGENT_ADDR).or(
+            () -> getVariable(CASC_VAULT_URL));
         Optional<String> vaultNamespace = getVariable(CASC_VAULT_NAMESPACE);
         Optional<String> vaultPrefixPath = getVariable(CASC_VAULT_PREFIX_PATH);
         Optional<String[]> vaultPaths = getCommaSeparatedVariables(CASC_VAULT_PATHS);
@@ -76,7 +75,7 @@ public class VaultSecretSource extends SecretSource {
                 new Object[]{CASC_VAULT_PATH, CASC_VAULT_PATHS}));
 
         // Check mandatory variables are set
-        if (!vaultUrl.isPresent() || !vaultPaths.isPresent()) return;
+        if (vaultUrl.isEmpty() || vaultPaths.isEmpty()) return;
 
         if (getVariable(CASC_VAULT_AGENT_ADDR).isPresent()) usingVaultAgent = true;
 
@@ -110,7 +109,7 @@ public class VaultSecretSource extends SecretSource {
             LOGGER.log(Level.WARNING, "Could not configure vault client", e);
         }
 
-        vault = new Vault(vaultConfig);
+        vault = Vault.create(vaultConfig);
     }
 
     private void determineAuthenticator() {
@@ -186,7 +185,7 @@ public class VaultSecretSource extends SecretSource {
                 // Parse secrets
                 for (String vaultPath : vaultPathsOpt.get()) {
                     Map<String, String> nextSecrets = vault.logical().read(vaultPath).getData();
-                    Map<String, String> nextSecretsFullPath = new HashMap<String, String>();
+                    Map<String, String> nextSecretsFullPath = new HashMap<>();
                     // create item where key is full path to secret
                     for (Map.Entry<String, String> secretEntry : nextSecrets.entrySet()) {
                         nextSecretsFullPath.put(vaultPath + "/" + secretEntry.getKey(), secretEntry.getValue());

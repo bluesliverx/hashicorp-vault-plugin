@@ -1,10 +1,8 @@
 package com.datapipe.jenkins.vault.credentials.common;
 
-import com.bettercloud.vault.VaultConfig;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsUnavailableException;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.datapipe.jenkins.vault.VaultAccessor;
 import com.datapipe.jenkins.vault.configuration.VaultConfigResolver;
@@ -17,12 +15,13 @@ import hudson.ExtensionList;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.security.ACL;
+import io.github.jopenlibs.vault.VaultConfig;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class VaultHelper {
 
@@ -118,10 +117,10 @@ public class VaultHelper {
             LOGGER.log(Level.INFO, "Retrieving vault credential ID : " + id);
         }
         List<VaultCredential> credentials = CredentialsProvider
-            .lookupCredentials(VaultCredential.class,
+            .lookupCredentialsInItemGroup(VaultCredential.class,
                 itemGroup,
-                ACL.SYSTEM,
-                Collections.<DomainRequirement>emptyList());
+                ACL.SYSTEM2,
+                Collections.emptyList());
         VaultCredential credential = CredentialsMatchers
             .firstOrNull(credentials, new IdMatcher(id));
 

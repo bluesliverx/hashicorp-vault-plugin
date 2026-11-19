@@ -9,6 +9,7 @@ import hudson.model.ItemGroup;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import java.io.Serial;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -17,12 +18,13 @@ import org.kohsuke.stapler.QueryParameter;
 
 import static com.datapipe.jenkins.vault.configuration.VaultConfiguration.engineVersions;
 import static com.datapipe.jenkins.vault.credentials.common.VaultHelper.getVaultSecretKey;
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class VaultStringCredentialImpl extends AbstractVaultBaseStandardCredentials implements VaultStringCredential {
 
     public static final String DEFAULT_VAULT_KEY = "secret";
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String vaultKey;

@@ -1,6 +1,5 @@
 package com.datapipe.jenkins.vault.credentials;
 
-import com.bettercloud.vault.Vault;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.IdCredentials;
 import com.datapipe.jenkins.vault.VaultAccessor;
@@ -13,6 +12,7 @@ import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import io.github.jopenlibs.vault.Vault;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.credentialsbinding.BindingDescriptor;
 import org.jenkinsci.plugins.credentialsbinding.MultiBinding;
 import org.jenkinsci.plugins.credentialsbinding.impl.CredentialNotFoundException;
@@ -149,7 +149,7 @@ public class VaultTokenCredentialBinding extends MultiBinding<AbstractVaultToken
         VaultConfiguration config) {
         if (StringUtils.isBlank(config.getPolicies())) {
             // Use simpler method to get token if no policies are set
-            return credentials.getToken(new Vault(config.getVaultConfig()));
+            return credentials.getToken(Vault.create(config.getVaultConfig()));
         }
         return credentials.authorizeWithVault(
             config.getVaultConfig(),
